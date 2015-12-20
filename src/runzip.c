@@ -18,8 +18,8 @@ main (int ac, char **av) {
 
 	if(ac != 2) {
 		fprintf(stderr,
-		  "UTF-8 -> Windows-1251 filename recoder in ZIP files\n"
-		  "Copyright (c) 2007, 2009 Lev Walkin <vlm@lionet.info>\n"
+		  "Windows-1251 -> UTF-8 filename recoder inside ZIP archives\n"
+		  "Copyright (c) 2007, 2009, 2015 Lev Walkin <vlm@lionet.info>\n"
 		  "libzip by Dieter Baron <dillo@giga.or.at> and Thomas Klausner <tk@giga.or.at>\n"
 		  "Usage: %s <file.zip>\n", basename(av[0]));
 		exit(EX_USAGE);
@@ -57,7 +57,7 @@ main (int ac, char **av) {
 		nName = malloc(nSize);
 		ip = fName; op = nName;
 
-		ic = iconv_open("UTF-8", "koi8-r");
+		ic = iconv_open("UTF-8", "windows-1251");
 		ir = iconv(ic, &ip, &fSize, &op, &nSize);
 		ie = errno;
 		iconv_close(ic);
