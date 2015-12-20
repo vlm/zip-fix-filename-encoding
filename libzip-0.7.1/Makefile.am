@@ -1,10 +1,6 @@
 # not GPL, thus no COPYING
 AUTOMAKE_OPTIONS=foreign
 
-SUBDIRS=lib src man regress
+# not needed for runzip: SUBDIRS=src man regress
+SUBDIRS=lib
 
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libzip.pc
-
-EXTRA_DIST=	libzip.pc.in \
-		libzip-uninstalled.pc.in

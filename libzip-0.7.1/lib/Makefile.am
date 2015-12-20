@@ -1,6 +1,5 @@
-lib_LTLIBRARIES = libzip.la
-noinst_HEADERS = zipint.h
-include_HEADERS = zip.h
+noinst_LTLIBRARIES = libzip.la
+noinst_HEADERS = zipint.h zip.h
 
 libzip_la_LDFLAGS=-version-info 1:0
 libzip_la_LIBADD=@LIBOBJS@

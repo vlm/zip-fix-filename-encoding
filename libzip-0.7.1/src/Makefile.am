@@ -1,4 +1,4 @@
-bin_PROGRAMS=zipcmp zipmerge
+noinst_PROGRAMS=zipcmp zipmerge
 
 zipcmp_CPPFLAGS=-I${top_srcdir}/lib
 zipcmp_LDADD=../lib/libzip.la
