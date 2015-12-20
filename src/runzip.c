@@ -196,7 +196,7 @@ main (int ac, char **av) {
 		 */
         fSize = strlen(fName);
         if(UTF8String_length(fName, fSize) >= 0) {
-            printf("No recode necessary for \"%s\"\n", fName);
+            printf("Leaving as is \"%s\"\n", fName);
             free(fName);
             continue;
         }
