@@ -52,11 +52,5 @@ in
 esac
 AC_SUBST([MANFMT])
 
-AC_CONFIG_FILES([Makefile
-		 libzip.pc
-		 libzip-uninstalled.pc
-		 man/Makefile
-		 lib/Makefile
-		 regress/Makefile
-		 src/Makefile])
+AC_CONFIG_FILES([Makefile lib/Makefile])
 AC_OUTPUT
