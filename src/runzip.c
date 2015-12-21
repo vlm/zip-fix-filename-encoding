@@ -142,7 +142,13 @@ compare_cyrillic_factors(const void *ap, const void *bp) {
  */
 static const char *detect_cyrillic_encoding(char *str, size_t len, int verbose) {
 #define NUM_ENCODINGS 6
-    char *try_encodings[NUM_ENCODINGS] = { "UTF-8-MAC", "UTF-8", "Windows-1251", "CP866", "KOI8-R", "KOI8-U" };
+    char *try_encodings[NUM_ENCODINGS] = {
+#if __APPLE__
+        "UTF-8-MAC", "UTF-8",
+#else
+        "UTF-8", "UTF-8-MAC",
+#endif
+        "Windows-1251", "CP866", "KOI8-R", "KOI8-U" };
     struct char_frequencies freqs[NUM_ENCODINGS];
     int ei;
 
