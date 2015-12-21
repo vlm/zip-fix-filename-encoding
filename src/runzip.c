@@ -140,7 +140,7 @@ compare_cyrillic_factors(const void *ap, const void *bp) {
  * building the character frequency tables, and then comparing these tables.
  * The encoding which produces the most cyrillic-like frequency profile wins.
  */
-static const char *detect_cyrillic_encoding(char *str, size_t len) {
+static const char *detect_cyrillic_encoding(char *str, size_t len, int verbose) {
 #define NUM_ENCODINGS 5
     char *try_encodings[NUM_ENCODINGS] = { "UTF-8", "Windows-1251", "CP866", "KOI8-R", "KOI8-U" };
     struct char_frequencies freqs[NUM_ENCODINGS];
@@ -162,10 +162,18 @@ static const char *detect_cyrillic_encoding(char *str, size_t len) {
 
     qsort(freqs, NUM_ENCODINGS, sizeof(freqs[0]), compare_cyrillic_factors);
 
+    if(verbose) {
+        printf("For \"%s\":\n", str);
+        for(ei = 0; ei < NUM_ENCODINGS; ei++) {
+            printf("\t%s factor %f\n", freqs[ei].encoding,
+                        cyrillic_factor(&freqs[ei]));
+        }
+    }
+
     return freqs[0].encoding;
 }
 
-static int fix_cyrillic_filenames(const char *zipfile, int dry_run, const char *source_encoding, const char *target_encoding) {
+static int fix_cyrillic_filenames(const char *zipfile, int dry_run, const char *suggested_source_encoding, const char *target_encoding, int verbose) {
     char ebuf[256];
     struct zip *z;
     int fidx, fmax;
@@ -186,21 +194,25 @@ static int fix_cyrillic_filenames(const char *zipfile, int dry_run, const char *
 
         fName = strdup(zip_get_name(z, fidx, 0));
         if(!fName) continue;
-
         fSize = strlen(fName);
+
+        const char *source_encoding = suggested_source_encoding;
         if(source_encoding == NULL)
-            source_encoding = detect_cyrillic_encoding(fName, fSize);
+            source_encoding = detect_cyrillic_encoding(fName, fSize, verbose);
 
         if(strcasecmp(source_encoding, target_encoding) == 0) {
             printf("%s: OK\n", fName);
             free(fName);
             continue;
+        } else if(verbose) {
+            printf("Converting \"%s\" (%s -> %s)\n",
+                fName, source_encoding, target_encoding);
         }
 
         char *nName = convert(fName, fSize, source_encoding, target_encoding);
         if(!nName) {
-            printf("Failed to recode \"%s\" (from %s): \"%s\"\n",
-                fName, source_encoding, strerror(errno));
+            printf("Failed to recode \"%s\" (%s -> %s): \"%s\"\n",
+                fName, source_encoding, target_encoding, strerror(errno));
             free(fName);
             continue;
         }
@@ -240,10 +252,11 @@ static void usage(char *argv0, const char *default_target_encoding) {
       "Russian filename encoding fix inside ZIP archives\n"
       "Copyright (c) 2007, 2009, 2015 Lev Walkin <vlm@lionet.info>\n"
       "libzip by Dieter Baron <dillo@giga.or.at> and Thomas Klausner <tk@giga.or.at>\n\n"
-      "Usage: %s [OPTIONS] <file.zip>...\n"
+      "Usage: %s [OPTIONS] <filename.zip>...\n"
       "Where OPTIONS are:\n"
       "  -h                 Display this help screen\n"
       "  -n                 Dry run. Do not modify the <file.zip>\n"
+      "  -v                 Verbose output\n"
       "  -s <encoding>      Set source encoding. Auto-detect, if not set\n"
       "  -t <encoding>      Set target encoding. Default is %s\n"
       , basename(argv0), default_target_encoding);
@@ -254,6 +267,7 @@ int
 main (int ac, char **av) {
     int ch;
     int dry_run = 0;    /* -n, do not modify archive */
+    int verbose = 0;
     const char *source_encoding = NULL;
 #if __APPLE__
     const char *default_target_encoding = "UTF-8-MAC";
@@ -262,10 +276,13 @@ main (int ac, char **av) {
 #endif
     const char *target_encoding = default_target_encoding;
 
-    while((ch = getopt(ac, av, "hns:t:")) != -1) {
+    while((ch = getopt(ac, av, "hvns:t:")) != -1) {
         switch(ch) {
         case 'n':
             dry_run = 1;
+            break;
+        case 'v':
+            verbose = 1;
             break;
         case 's': {
             source_encoding = optarg;
@@ -301,7 +318,8 @@ main (int ac, char **av) {
 
     for(; optind < ac; optind++) {
         char *zipfile = av[optind];
-        if(fix_cyrillic_filenames(zipfile, dry_run, source_encoding, target_encoding) == -1) {
+        if(fix_cyrillic_filenames(zipfile, dry_run,
+                    source_encoding, target_encoding, verbose) == -1) {
             exit(EX_NOINPUT);
         }
     }
