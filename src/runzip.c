@@ -126,6 +126,11 @@ compare_cyrillic_factors(const void *ap, const void *bp) {
     const struct char_frequencies *a = ap;
     const struct char_frequencies *b = bp;
 
+    if(a->characters_seen && a->characters_seen < b->characters_seen)
+        return -1;
+    else if(b->characters_seen && a->characters_seen > b->characters_seen)
+        return 1;
+
     double rfa = cyrillic_factor(a);
     double rfb = cyrillic_factor(b);
     if(rfa < rfb) return 1;
