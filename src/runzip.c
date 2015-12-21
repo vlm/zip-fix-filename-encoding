@@ -293,4 +293,6 @@ main (int ac, char **av) {
             exit(EX_NOINPUT);
         }
     }
+
+    return 0;
 }
