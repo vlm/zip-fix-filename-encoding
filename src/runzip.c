@@ -9,7 +9,6 @@
 #include <iconv.h>
 
 #include <zip.h>
-#include "UTF8String.h"
 
 /*
  * Convert a string of the given length from (from_enc)
