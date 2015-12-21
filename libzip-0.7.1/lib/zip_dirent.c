@@ -201,7 +201,8 @@ is_directory(unsigned short madeby, unsigned short ext_attrib) {
 int
 _zip_dirent_read(struct zip_dirent *zde, FILE *fp,
 		 unsigned char **bufp, unsigned int left, int localp,
-		 struct zip_error *error)
+		 struct zip_error *error,
+         enum runzip_direction direction)
 {
     unsigned char buf[CDENTRYSIZE];
     unsigned char *cur;
@@ -275,16 +276,29 @@ _zip_dirent_read(struct zip_dirent *zde, FILE *fp,
     }
 
     /* Added by vlm@ to unlock unicode filenames and set proper perms. */
-    if(!localp) {
+    if(!localp && direction != RUNZIP_NODIR) {
         int old_madeby = zde->version_madeby;
         int is_dir = is_directory(zde->version_madeby, zde->ext_attrib);
+        const int MADEBY_DOS = 0x0000;
+        const int MADEBY_UNIX = 0x0300;
+        const int MADEBY_NTFS = 0x0B00;
 
-        if(zde->version_madeby == 0)
-            zde->version_madeby = 0x1e;
-        if((zde->version_madeby & 0xff00) == 0x00)
-            zde->version_madeby |= 0x0300;
-        if(zde->ext_attrib == 0 || (old_madeby & 0xff00) != 0x0300)
-            zde->ext_attrib = ((0100644 | (is_dir?0111:0)) << 16);
+        if(direction == RUNZIP_TO_UNIX) {
+            if(zde->version_madeby == 0)
+                zde->version_madeby = 0x1e;
+            if((zde->version_madeby & 0xff00) == MADEBY_DOS)
+                zde->version_madeby = (zde->version_madeby & ~0xff00)
+                                        |  MADEBY_UNIX;
+            if(zde->ext_attrib == 0 || (old_madeby & 0xff00) != MADEBY_UNIX)
+                zde->ext_attrib = ((0100644 | (is_dir?0111:0)) << 16);
+        } else if(direction == RUNZIP_TO_WINDOWS) {
+            zde->version_madeby = (zde->version_madeby & ~0xff)
+                                    | 0x14;
+            if((zde->version_madeby & 0xff00) == MADEBY_UNIX)
+                zde->version_madeby = (zde->version_madeby & ~0xff00)
+                                        |  MADEBY_NTFS;
+            zde->ext_attrib = 0;
+        }
     }
 
     zde->filename = NULL;

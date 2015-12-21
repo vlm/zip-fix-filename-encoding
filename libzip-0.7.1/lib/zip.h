@@ -176,7 +176,13 @@ const char *zip_get_file_comment(struct zip *, int, int *, int);
 const char *zip_get_name(struct zip *, int, int);
 int zip_get_num_files(struct zip *);
 int zip_name_locate(struct zip *, const char *, int);
+enum runzip_direction {
+    RUNZIP_NODIR,
+    RUNZIP_TO_UNIX,
+    RUNZIP_TO_WINDOWS,
+};
 struct zip *zip_open(const char *, int, int *);
+struct zip *zip_open2(const char *, int, int *, enum runzip_direction);
 int zip_rename(struct zip *, int, const char *);
 int zip_replace(struct zip *, int, struct zip_source *);
 int zip_set_archive_comment(struct zip *, const char *, int);

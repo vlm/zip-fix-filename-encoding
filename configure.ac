@@ -1,4 +1,4 @@
-AC_INIT(runzip, 1.2, vlm@lionet.info)
+AC_INIT(runzip, 1.3, vlm@lionet.info)
 
 AC_CONFIG_SRCDIR([src/runzip.c])
 AC_CONFIG_AUX_DIR(config)

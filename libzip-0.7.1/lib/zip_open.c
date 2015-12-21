@@ -51,12 +51,18 @@ static int _zip_headercomp(struct zip_dirent *, int,
 static unsigned char *_zip_memmem(const unsigned char *, int,
 				  const unsigned char *, int);
 static struct zip_cdir *_zip_readcdir(FILE *, unsigned char *, unsigned char *,
-				 int, int, struct zip_error *);
+				 int, int, struct zip_error *, enum runzip_direction);
 
 
 
 struct zip *
 zip_open(const char *fn, int flags, int *zep)
+{
+    return zip_open2(fn, flags, zep, RUNZIP_NODIR);
+}
+
+struct zip *
+zip_open2(const char *fn, int flags, int *zep, enum runzip_direction direction)
 {
     FILE *fp;
     unsigned char *buf, *match;
@@ -141,7 +147,7 @@ zip_open(const char *fn, int flags, int *zep)
 	/* to avoid finding the same match all over again */
 	match++;
 	if ((cdirnew=_zip_readcdir(fp, buf, match-1, buflen, flags,
-				   &err2)) == NULL) {
+				   &err2, direction)) == NULL) {
 	    if (best == -2) {
 		set_error(zep, &err2, 0);
 		best = -1;
@@ -193,6 +199,7 @@ zip_open(const char *fn, int flags, int *zep)
 
     za->zp = fp;
     za->cdir = cdir;
+    za->runzip = direction;
     
     if ((za->zn=strdup(fn)) == NULL) {
 	set_error(zep, NULL, ZIP_ER_MEMORY);
@@ -239,7 +246,7 @@ set_error(int *zep, struct zip_error *err, int ze)
 
 static struct zip_cdir *
 _zip_readcdir(FILE *fp, unsigned char *buf, unsigned char *eocd, int buflen,
-	      int flags, struct zip_error *error)
+	      int flags, struct zip_error *error, enum runzip_direction direction)
 {
     struct zip_cdir *cd;
     unsigned char *cdp, **bufp;
@@ -320,7 +327,7 @@ _zip_readcdir(FILE *fp, unsigned char *buf, unsigned char *eocd, int buflen,
 
     for (i=0; i<cd->nentry; i++) {
 	if ((_zip_dirent_read(cd->entry+i, fp, bufp, eocd-cdp, 0,
-			      error)) < 0) {
+			      error, direction)) < 0) {
 	    cd->nentry = i;
 	    _zip_cdir_free(cd);
 	    return NULL;
@@ -374,7 +381,7 @@ _zip_checkcons(FILE *fp, struct zip_cdir *cd, struct zip_error *error)
 	    return -1;
 	}
 	
-	if (_zip_dirent_read(&temp, fp, NULL, 0, 1, error) == -1)
+	if (_zip_dirent_read(&temp, fp, NULL, 0, 1, error, RUNZIP_NODIR) == -1)
 	    return -1;
 	
 	if (_zip_headercomp(cd->entry+i, 0, &temp, 1) != 0) {

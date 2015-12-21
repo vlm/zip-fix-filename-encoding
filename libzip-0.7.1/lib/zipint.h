@@ -106,6 +106,8 @@ struct zip {
     int nfile;			/* number of opened files within archive */
     int nfile_alloc;		/* number of files allocated */
     struct zip_file **file;	/* opened files within archive */
+
+    enum runzip_direction runzip;
 };
 
 /* file in zip archive, part of API */
@@ -200,7 +202,8 @@ int _zip_cdir_write(struct zip_cdir *, FILE *, struct zip_error *);
 void _zip_dirent_finalize(struct zip_dirent *);
 void _zip_dirent_init(struct zip_dirent *);
 int _zip_dirent_read(struct zip_dirent *, FILE *,
-		     unsigned char **, unsigned int, int, struct zip_error *);
+		     unsigned char **, unsigned int, int, struct zip_error *,
+             enum runzip_direction);
 int _zip_dirent_write(struct zip_dirent *, FILE *, int, struct zip_error *);
 
 void _zip_entry_free(struct zip_entry *);

@@ -136,7 +136,7 @@ zip_close(struct zip *za)
 		error = 1;
 		break;
 	    }
-	    if (_zip_dirent_read(&de, za->zp, NULL, 0, 1, &za->error) != 0) {
+	    if (_zip_dirent_read(&de, za->zp, NULL, 0, 1, &za->error, za->runzip) != 0) {
 		error = 1;
 		break;
 	    }

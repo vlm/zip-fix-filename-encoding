@@ -24,3 +24,6 @@ a ZIP archive.
       -v                 Verbose output
       -s <encoding>      Set source encoding. Auto-detect, if not set
       -t <encoding>      Set target encoding. Default is UTF-8
+      -w                 Make archive readable on Windows (reverse operation)
+                         NOTE: -w implies -t cp866 (Yes! MS-DOS!)
+

@@ -185,13 +185,13 @@ static const char *detect_cyrillic_encoding(char *str, size_t len, int verbose) 
     return freqs[0].encoding;
 }
 
-static int fix_cyrillic_filenames(const char *zipfile, int dry_run, const char *suggested_source_encoding, const char *target_encoding, int verbose) {
+static int fix_cyrillic_filenames(const char *zipfile, int dry_run, const char *suggested_source_encoding, const char *target_encoding, enum runzip_direction runzip_direction, int verbose) {
     char ebuf[256];
     struct zip *z;
     int fidx, fmax;
     int e;
 
-    z = zip_open(zipfile, 0, &e);
+    z = zip_open2(zipfile, 0, &e, runzip_direction);
     if(!z) {
         zip_error_to_str(ebuf, sizeof ebuf, e, errno);
         fprintf(stderr, "%s: %s\n", zipfile, ebuf);
@@ -271,6 +271,8 @@ static void usage(char *argv0, const char *default_target_encoding) {
       "  -v                 Verbose output\n"
       "  -s <encoding>      Set source encoding. Auto-detect, if not set\n"
       "  -t <encoding>      Set target encoding. Default is %s\n"
+      "  -w                 Make archive readable on Windows (reverse operation)\n"
+      "                     NOTE: -w implies -t cp866 (Yes! MS-DOS!)\n"
       , basename(argv0), default_target_encoding);
     exit(EX_USAGE);
 }
@@ -280,6 +282,7 @@ main (int ac, char **av) {
     int ch;
     int dry_run = 0;    /* -n, do not modify archive */
     int verbose = 0;
+    enum runzip_direction direction = RUNZIP_TO_UNIX;
     const char *source_encoding = NULL;
 #if __APPLE__
     const char *default_target_encoding = "UTF-8-MAC";
@@ -288,7 +291,7 @@ main (int ac, char **av) {
 #endif
     const char *target_encoding = default_target_encoding;
 
-    while((ch = getopt(ac, av, "hvns:t:")) != -1) {
+    while((ch = getopt(ac, av, "hvnws:t:")) != -1) {
         switch(ch) {
         case 'n':
             dry_run = 1;
@@ -319,6 +322,10 @@ main (int ac, char **av) {
             }
             break;
             }
+        case 'w':
+            target_encoding = "cp866";
+            direction = RUNZIP_TO_WINDOWS;
+            break;
         case 'h':
             /* FALL THROUGH */
         default:
@@ -331,7 +338,8 @@ main (int ac, char **av) {
     for(; optind < ac; optind++) {
         char *zipfile = av[optind];
         if(fix_cyrillic_filenames(zipfile, dry_run,
-                    source_encoding, target_encoding, verbose) == -1) {
+                    source_encoding, target_encoding,
+                    direction, verbose) == -1) {
             exit(EX_NOINPUT);
         }
     }
