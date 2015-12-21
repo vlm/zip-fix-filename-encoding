@@ -14,8 +14,7 @@ AM_PROG_LIBTOOL
 
 CFLAGS="$CFLAGS -I/usr/local/include"
 LDFLAGS="$LDFLAGS -L/usr/local/lib"
-AC_CHECK_LIB(iconv, iconv_open, [],
-	[AC_MSG_FAILURE([libiconv is missing. Install iconv first.])])
+AC_CHECK_LIB(iconv, iconv_open)
 AC_CHECK_HEADERS(iconv.h, [],
 	[AC_MSG_FAILURE([iconv.h is missing.])])
 
