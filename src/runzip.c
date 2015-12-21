@@ -141,8 +141,8 @@ compare_cyrillic_factors(const void *ap, const void *bp) {
  * The encoding which produces the most cyrillic-like frequency profile wins.
  */
 static const char *detect_cyrillic_encoding(char *str, size_t len, int verbose) {
-#define NUM_ENCODINGS 5
-    char *try_encodings[NUM_ENCODINGS] = { "UTF-8", "Windows-1251", "CP866", "KOI8-R", "KOI8-U" };
+#define NUM_ENCODINGS 6
+    char *try_encodings[NUM_ENCODINGS] = { "UTF-8-MAC", "UTF-8", "Windows-1251", "CP866", "KOI8-R", "KOI8-U" };
     struct char_frequencies freqs[NUM_ENCODINGS];
     int ei;
 
@@ -165,8 +165,9 @@ static const char *detect_cyrillic_encoding(char *str, size_t len, int verbose) 
     if(verbose) {
         printf("For \"%s\":\n", str);
         for(ei = 0; ei < NUM_ENCODINGS; ei++) {
-            printf("\t%s factor %f\n", freqs[ei].encoding,
-                        cyrillic_factor(&freqs[ei]));
+            printf("\t%s factor %f (%ld)\n", freqs[ei].encoding,
+                        cyrillic_factor(&freqs[ei]),
+                        (long)freqs[ei].characters_seen);
         }
     }
 
@@ -201,17 +202,17 @@ static int fix_cyrillic_filenames(const char *zipfile, int dry_run, const char *
             source_encoding = detect_cyrillic_encoding(fName, fSize, verbose);
 
         if(strcasecmp(source_encoding, target_encoding) == 0) {
-            printf("%s: OK\n", fName);
+            printf("  %s: OK\n", fName);
             free(fName);
             continue;
         } else if(verbose) {
-            printf("Converting \"%s\" (%s -> %s)\n",
+            printf("  Converting \"%s\" (%s -> %s)\n",
                 fName, source_encoding, target_encoding);
         }
 
         char *nName = convert(fName, fSize, source_encoding, target_encoding);
         if(!nName) {
-            printf("Failed to recode \"%s\" (%s -> %s): \"%s\"\n",
+            printf("  Failed to recode \"%s\" (%s -> %s): \"%s\"\n",
                 fName, source_encoding, target_encoding, strerror(errno));
             free(fName);
             continue;
@@ -222,16 +223,16 @@ static int fix_cyrillic_filenames(const char *zipfile, int dry_run, const char *
          * If the source and destination match, ignore.
          */
         if(fSize == strlen(nName) && strcmp(nName, fName) == 0) {
-            printf("%s: OK\n", fName);
+            printf("  %s: OK\n", fName);
             free(fName);
             continue;
         }
 
         if(!dry_run && zip_rename(z, fidx, nName)) {
-            printf("Failed to rename \"%s\"-> \"%s\": %s\n",
-                fName, nName, zip_strerror(z));
+            printf("  %s: Failed to rename inside archive: %s\n",
+                nName, zip_strerror(z));
         } else {
-            printf("%s: FIXED (%s -> %s)\n", nName,
+            printf("  %s: FIXED (%s -> %s)\n", nName,
                     source_encoding, target_encoding);
         }
         free(fName);

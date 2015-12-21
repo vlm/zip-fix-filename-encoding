@@ -1,4 +1,9 @@
 
+1.2:    2015-Dec-20
+    * Fix encoding detection bug.
+    * Properly set directories permissions.
+    * Fixed idempotence of double-conversion into UTF-8-MAC.
+
 1.1:    2015-Dec-20
     * Use UTF-8-MAC on Apple Macs.
 
