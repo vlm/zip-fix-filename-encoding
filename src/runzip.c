@@ -14,7 +14,7 @@
  * Convert a string of the given length from (from_enc)
  * to (to_enc) character encoding.
  */
-static char *convert(char *str, size_t len, const char *from_enc, const char *to_enc) {
+static char *convert(char *str, size_t len, const char *from_enc, const char *to_enc, int verbose) {
 
     size_t outlen = 6 * len;
     char *outstr = malloc(outlen + 1);
@@ -27,10 +27,15 @@ static char *convert(char *str, size_t len, const char *from_enc, const char *to
         free(outstr);
         outstr = NULL;
     } else {
+        char *original = str;
         ir = iconv(ic, &str, &len, &op, &outlen);
         ie = errno;
         iconv_close(ic);
         if(ir == -1) {
+            if(verbose >= 2) {
+                printf("    Failed to convert \"%s\" (%s -> %s) near \"%s\": \"%s\"\n",
+                    original, from_enc, to_enc, str, strerror(errno));
+            }
             free(outstr);
             outstr = NULL;
         } else {
@@ -160,7 +165,7 @@ static const char *detect_cyrillic_encoding(char *str, size_t len, int verbose) 
     for(ei = 0; ei < NUM_ENCODINGS; ei++) {
         memset(&freqs[ei], 0, sizeof(freqs[0]));
         freqs[ei].encoding = try_encodings[ei];
-        char *out = convert(str, len, try_encodings[ei], "KOI8-U");
+        char *out = convert(str, len, try_encodings[ei], "KOI8-U", verbose);
         if(!out) continue;  /* Could not convert */
         const char *p;
         /* Fill out a frequency table */
@@ -221,7 +226,8 @@ static int fix_cyrillic_filenames(const char *zipfile, int dry_run, const char *
                 fName, source_encoding, target_encoding);
         }
 
-        char *nName = convert(fName, fSize, source_encoding, target_encoding);
+        char *nName = convert(fName, fSize, source_encoding, target_encoding,
+                              verbose);
         if(!nName) {
             printf("  Failed to recode \"%s\" (%s -> %s): \"%s\"\n",
                 fName, source_encoding, target_encoding, strerror(errno));
@@ -297,7 +303,7 @@ main (int ac, char **av) {
             dry_run = 1;
             break;
         case 'v':
-            verbose = 1;
+            verbose++;
             break;
         case 's': {
             source_encoding = optarg;
