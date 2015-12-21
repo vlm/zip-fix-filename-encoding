@@ -1,0 +1,6 @@
+language: c
+sudo: false
+compiler:
+  - gcc
+  - clang
+script: autoreconf -iv && ./configure && make check

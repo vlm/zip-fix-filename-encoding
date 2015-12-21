@@ -13,6 +13,8 @@ a ZIP archive.
     ./configure
     make install
 
+[![Build Status](https://travis-ci.org/vlm/zip-fix-filename-encoding.svg?branch=master)](https://travis-ci.org/vlm/zip-fix-filename-encoding)
+
 # Usage
 
     runzip [OPTIONS] <filename.zip>...
