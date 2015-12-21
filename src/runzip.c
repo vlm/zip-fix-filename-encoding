@@ -14,7 +14,7 @@
  * Convert a string of the given length from (from_enc)
  * to (to_enc) character encoding.
  */
-static char *convert(char *str, size_t len, const char *from_enc, const char *to_enc, int verbose) {
+static char *convert(const char *str, size_t len, const char *from_enc, const char *to_enc, int verbose) {
 
     size_t outlen = 6 * len;
     char *outstr = malloc(outlen + 1);
@@ -27,7 +27,7 @@ static char *convert(char *str, size_t len, const char *from_enc, const char *to
         free(outstr);
         outstr = NULL;
     } else {
-        char *original = str;
+        const char *original = str;
         ir = iconv(ic, &str, &len, &op, &outlen);
         ie = errno;
         iconv_close(ic);
