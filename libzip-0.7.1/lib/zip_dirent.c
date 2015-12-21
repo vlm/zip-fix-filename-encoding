@@ -172,6 +172,18 @@ _zip_dirent_init(struct zip_dirent *de)
 
 
 
+static int
+is_directory(unsigned short madeby, unsigned short ext_attrib) {
+    const int MADEBY_DOS = 0x0000;
+    const int MADEBY_UNIX = 0x0300;
+    int is_dir =
+        (((madeby & 0xff00) == MADEBY_DOS)
+        &&  (ext_attrib & 0x10))
+        || (((madeby & 0xff00) == MADEBY_UNIX)
+            &&  (ext_attrib & (0x111 << 16)));
+    return is_dir;
+}
+
 /* _zip_dirent_read(zde, fp, bufp, left, localp, error):
    Fills the zip directory entry zde.
 
@@ -263,9 +275,16 @@ _zip_dirent_read(struct zip_dirent *zde, FILE *fp,
     }
 
     /* Added by vlm@ to unlock unicode filenames and set proper perms. */
-    if(!localp && zde->ext_attrib == 0) {
-        zde->version_madeby = 0x31e;
-        zde->ext_attrib = (0100644 << 16);
+    if(!localp) {
+        int old_madeby = zde->version_madeby;
+        int is_dir = is_directory(zde->version_madeby, zde->ext_attrib);
+
+        if(zde->version_madeby == 0)
+            zde->version_madeby = 0x1e;
+        if((zde->version_madeby & 0xff00) == 0x00)
+            zde->version_madeby |= 0x0300;
+        if(zde->ext_attrib == 0 || (old_madeby & 0xff00) != 0x0300)
+            zde->ext_attrib = ((0100644 | (is_dir?0111:0)) << 16);
     }
 
     zde->filename = NULL;
