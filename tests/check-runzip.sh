@@ -10,10 +10,10 @@ cp -r originals processed
 
 ${RUNZIP} processed/*.zip
 
-zipdetails processed/windows-archive.zip
+# zipdetails processed/windows-archive.zip
 unzip -d processed/windows processed/windows-archive.zip
 
-zipdetails processed/mac-archive.zip
+# zipdetails processed/mac-archive.zip
 unzip -d processed/mac processed/mac-archive.zip
 
 ls -alR processed
