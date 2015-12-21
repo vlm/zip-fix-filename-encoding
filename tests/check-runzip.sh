@@ -8,7 +8,7 @@ RUNZIP=${RUNZIP=../src/runzip}
 rm -rf processed
 cp -r originals processed
 
-${RUNZIP} processed/*.zip
+${RUNZIP} -v processed/*.zip
 
 # zipdetails processed/windows-archive.zip
 unzip -d processed/windows processed/windows-archive.zip
