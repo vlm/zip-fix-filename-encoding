@@ -262,6 +262,12 @@ _zip_dirent_read(struct zip_dirent *zde, FILE *fp,
 	zde->offset = _zip_read4(&cur);
     }
 
+    /* Added by vlm@ to unlock unicode filenames and set proper perms. */
+    if(!localp && zde->ext_attrib == 0) {
+        zde->version_madeby = 0x31e;
+        zde->ext_attrib = (0100644 << 16);
+    }
+
     zde->filename = NULL;
     zde->extrafield = NULL;
     zde->comment = NULL;
