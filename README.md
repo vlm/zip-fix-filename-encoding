@@ -17,10 +17,10 @@ a ZIP archive.
 
 # Usage
 
-    runzip [OPTIONS] <filename.zip>...
+    Usage: runzip [OPTIONS] <filename.zip>...
     Where OPTIONS are:
       -h                 Display this help screen
       -n                 Dry run. Do not modify the <file.zip>
+      -v                 Verbose output
       -s <encoding>      Set source encoding. Auto-detect, if not set
       -t <encoding>      Set target encoding. Default is UTF-8
-
