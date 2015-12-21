@@ -15,4 +15,10 @@ a ZIP archive.
 
 # Usage
 
-    runzip <filename.zip>
+    runzip [OPTIONS] <filename.zip>...
+    Where OPTIONS are:
+      -h                 Display this help screen
+      -n                 Dry run. Do not modify the <file.zip>
+      -s <encoding>      Set source encoding. Auto-detect, if not set
+      -t <encoding>      Set target encoding. Default is UTF-8
+

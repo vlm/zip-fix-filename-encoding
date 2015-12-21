@@ -230,7 +230,7 @@ static int fix_cyrillic_filenames(const char *zipfile, int dry_run, const char *
 
 static void usage(char *argv0) {
     fprintf(stderr,
-      "DOS/Windows Russian -> UTF-8 filename recoder inside ZIP archives\n"
+      "Russian filename encoding fix inside ZIP archives\n"
       "Copyright (c) 2007, 2009, 2015 Lev Walkin <vlm@lionet.info>\n"
       "libzip by Dieter Baron <dillo@giga.or.at> and Thomas Klausner <tk@giga.or.at>\n\n"
       "Usage: %s [OPTIONS] <file.zip>...\n"
