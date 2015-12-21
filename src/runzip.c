@@ -141,12 +141,12 @@ compare_cyrillic_factors(const void *ap, const void *bp) {
  * The encoding which produces the most cyrillic-like frequency profile wins.
  */
 static const char *detect_cyrillic_encoding(char *str, size_t len) {
-    const int num_encodings = 5;
-    char *try_encodings[num_encodings] = { "UTF-8", "Windows-1251", "CP866", "KOI8-R", "KOI8-U" };
-    struct char_frequencies freqs[num_encodings];
+#define NUM_ENCODINGS 5
+    char *try_encodings[NUM_ENCODINGS] = { "UTF-8", "Windows-1251", "CP866", "KOI8-R", "KOI8-U" };
+    struct char_frequencies freqs[NUM_ENCODINGS];
     int ei;
 
-    for(ei = 0; ei < num_encodings; ei++) {
+    for(ei = 0; ei < NUM_ENCODINGS; ei++) {
         memset(&freqs[ei], 0, sizeof(freqs[0]));
         freqs[ei].encoding = try_encodings[ei];
         char *out = convert(str, len, try_encodings[ei], "KOI8-U");
@@ -160,7 +160,7 @@ static const char *detect_cyrillic_encoding(char *str, size_t len) {
         free(out);
     }
 
-    qsort(freqs, num_encodings, sizeof(freqs[0]), compare_cyrillic_factors);
+    qsort(freqs, NUM_ENCODINGS, sizeof(freqs[0]), compare_cyrillic_factors);
 
     return freqs[0].encoding;
 }
