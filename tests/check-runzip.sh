@@ -1,4 +1,7 @@
-#!/usr/bin/env bash -eu
+#!/usr/bin/env bash
+
+set -e
+set -u
 
 RUNZIP=${RUNZIP=../src/runzip}
 
