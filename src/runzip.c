@@ -153,11 +153,7 @@ compare_cyrillic_factors(const void *ap, const void *bp) {
 static const char *detect_cyrillic_encoding(char *str, size_t len, int verbose) {
 #define NUM_ENCODINGS 6
     char *try_encodings[NUM_ENCODINGS] = {
-#if __APPLE__
-        "UTF-8-MAC", "UTF-8",
-#else
         "UTF-8", "UTF-8-MAC",
-#endif
         "Windows-1251", "CP866", "KOI8-R", "KOI8-U" };
     struct char_frequencies freqs[NUM_ENCODINGS];
     int ei;
@@ -290,11 +286,7 @@ main (int ac, char **av) {
     int verbose = 0;
     enum runzip_direction direction = RUNZIP_TO_UNIX;
     const char *source_encoding = NULL;
-#if __APPLE__
-    const char *default_target_encoding = "UTF-8-MAC";
-#else
     const char *default_target_encoding = "UTF-8";
-#endif
     const char *target_encoding = default_target_encoding;
 
     while((ch = getopt(ac, av, "hvnws:t:")) != -1) {
