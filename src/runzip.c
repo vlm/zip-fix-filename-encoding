@@ -191,9 +191,6 @@ static int fix_cyrillic_filenames(const char *zipfile, int dry_run, const char *
         if(source_encoding == NULL)
             source_encoding = detect_cyrillic_encoding(fName, fSize);
 
-		/*
-		 * Check if the name is alredy encoded in a valid target encoding.
-		 */
         if(strcasecmp(source_encoding, target_encoding) == 0) {
             printf("%s: OK\n", fName);
             free(fName);
@@ -204,6 +201,16 @@ static int fix_cyrillic_filenames(const char *zipfile, int dry_run, const char *
         if(!nName) {
             printf("Failed to recode \"%s\" (from %s): \"%s\"\n",
                 fName, source_encoding, strerror(errno));
+            free(fName);
+            continue;
+        }
+
+        /*
+         * Check if the name is alredy encoded in a valid target encoding.
+         * If the source and destination match, ignore.
+         */
+        if(fSize == strlen(nName) && strcmp(nName, fName) == 0) {
+            printf("%s: OK\n", fName);
             free(fName);
             continue;
         }
@@ -228,7 +235,7 @@ static int fix_cyrillic_filenames(const char *zipfile, int dry_run, const char *
     }
 }
 
-static void usage(char *argv0) {
+static void usage(char *argv0, const char *default_target_encoding) {
     fprintf(stderr,
       "Russian filename encoding fix inside ZIP archives\n"
       "Copyright (c) 2007, 2009, 2015 Lev Walkin <vlm@lionet.info>\n"
@@ -238,8 +245,8 @@ static void usage(char *argv0) {
       "  -h                 Display this help screen\n"
       "  -n                 Dry run. Do not modify the <file.zip>\n"
       "  -s <encoding>      Set source encoding. Auto-detect, if not set\n"
-      "  -t <encoding>      Set target encoding. Default is UTF-8\n"
-      , basename(argv0));
+      "  -t <encoding>      Set target encoding. Default is %s\n"
+      , basename(argv0), default_target_encoding);
     exit(EX_USAGE);
 }
 
@@ -248,7 +255,12 @@ main (int ac, char **av) {
     int ch;
     int dry_run = 0;    /* -n, do not modify archive */
     const char *source_encoding = NULL;
-    const char *target_encoding = "UTF-8";
+#if __APPLE__
+    const char *default_target_encoding = "UTF-8-MAC";
+#else
+    const char *default_target_encoding = "UTF-8";
+#endif
+    const char *target_encoding = default_target_encoding;
 
     while((ch = getopt(ac, av, "hns:t:")) != -1) {
         switch(ch) {
@@ -281,11 +293,11 @@ main (int ac, char **av) {
         case 'h':
             /* FALL THROUGH */
         default:
-            usage(av[0]);
+            usage(av[0], default_target_encoding);
         }
     }
     if(optind >= ac)
-        usage(av[0]);
+        usage(av[0], default_target_encoding);
 
     for(; optind < ac; optind++) {
         char *zipfile = av[optind];
