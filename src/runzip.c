@@ -14,8 +14,9 @@
  * Convert a string of the given length from (from_enc)
  * to (to_enc) character encoding.
  */
-static char *convert(const char *str, size_t len, const char *from_enc, const char *to_enc, int verbose) {
-
+static char *
+convert(const char *str, size_t len, const char *from_enc, const char *to_enc,
+        int verbose) {
     size_t outlen = 6 * len;
     char *outstr = malloc(outlen + 1);
     char *op = outstr;
@@ -33,7 +34,9 @@ static char *convert(const char *str, size_t len, const char *from_enc, const ch
         iconv_close(ic);
         if(ir == -1) {
             if(verbose >= 2) {
-                printf("    Failed to convert \"%s\" (%s -> %s) near \"%s\": \"%s\"\n",
+                printf(
+                    "    Failed to convert \"%s\" (%s -> %s) near \"%s\": "
+                    "\"%s\"\n",
                     original, from_enc, to_enc, str, strerror(errno));
             }
             free(outstr);
@@ -65,45 +68,44 @@ struct char_frequencies {
 static double
 cyrillic_factor(const struct char_frequencies *freq) {
     static double scale[256] = {
-        [32 ... 126] = 0.001,
-        [207] = 11.07,  /* О */
-        [197] = 8.50,   /* Е */
-        [193] = 7.50,   /* А */
-        [201] = 7.09,   /* И */
-        [206] = 6.70,   /* Н */
-        [212] = 5.97,   /* Т */
-        [211] = 4.97,   /* С */
-        [204] = 4.96,   /* Л */
-        [215] = 4.33,   /* В */
-        [210] = 4.33,   /* Р */
-        [203] = 3.30,   /* К */
-        [237] = 3.10,   /* М */
-        [196] = 3.09,   /* Д */
-        [208] = 2.47,   /* П */
-        [217] = 2.36,   /* Ы */
-        [213] = 2.22,   /* У */
-        [194] = 2.01,   /* Б */
-        [209] = 1.96,   /* Я */
-        [216] = 1.84,   /* Ь */
-        [199] = 1.72,   /* Г */
-        [218] = 1.48,   /* З */
-        [222] = 1.40,   /* Ч */
-        [202] = 1.21,   /* Й */
-        [214] = 1.01,   /* Ж */
-        [200] = 0.95,   /* Х */
-        [219] = 0.72,   /* Ш */
-        [192] = 0.47,   /* Ю */
-        [195] = 0.39,   /* Ц */
-        [220] = 0.35,   /* Э */
-        [221] = 0.30,   /* Щ */
-        [198] = 0.21,   /* Ф */
-        [163] = 0.20,   /* Ё */
-        [223] = 0.02,   /* Ъ */
-        /* Ukrainian; estimates from http://megamozg.ru/post/2336/ */
-        [164] = 0.3,    /* Є */
-        [166] = 5.0,    /* І */
-        [167] = 0.3,    /* Ї */
-        [173] = 0.01,   /* Ґ */
+            [32 ... 126] = 0.001, [207] = 11.07, /* О */
+            [197] = 8.50,                        /* Е */
+            [193] = 7.50,                        /* А */
+            [201] = 7.09,                        /* И */
+            [206] = 6.70,                        /* Н */
+            [212] = 5.97,                        /* Т */
+            [211] = 4.97,                        /* С */
+            [204] = 4.96,                        /* Л */
+            [215] = 4.33,                        /* В */
+            [210] = 4.33,                        /* Р */
+            [203] = 3.30,                        /* К */
+            [237] = 3.10,                        /* М */
+            [196] = 3.09,                        /* Д */
+            [208] = 2.47,                        /* П */
+            [217] = 2.36,                        /* Ы */
+            [213] = 2.22,                        /* У */
+            [194] = 2.01,                        /* Б */
+            [209] = 1.96,                        /* Я */
+            [216] = 1.84,                        /* Ь */
+            [199] = 1.72,                        /* Г */
+            [218] = 1.48,                        /* З */
+            [222] = 1.40,                        /* Ч */
+            [202] = 1.21,                        /* Й */
+            [214] = 1.01,                        /* Ж */
+            [200] = 0.95,                        /* Х */
+            [219] = 0.72,                        /* Ш */
+            [192] = 0.47,                        /* Ю */
+            [195] = 0.39,                        /* Ц */
+            [220] = 0.35,                        /* Э */
+            [221] = 0.30,                        /* Щ */
+            [198] = 0.21,                        /* Ф */
+            [163] = 0.20,                        /* Ё */
+            [223] = 0.02,                        /* Ъ */
+            /* Ukrainian; estimates from http://megamozg.ru/post/2336/ */
+            [164] = 0.3,  /* Є */
+            [166] = 5.0,  /* І */
+            [167] = 0.3,  /* Ї */
+            [173] = 0.01, /* Ґ */
     };
 
     double factor = 0.0;
@@ -111,12 +113,13 @@ cyrillic_factor(const struct char_frequencies *freq) {
         /*
          * Lowercase KOI8-R/KOI8-U character.
          */
-        unsigned char ch = i >= 225 ? (i-32) : i;
-        if (ch == 179) ch -= 16;    /* ё */
-        if (ch == 180 || ch == 182 || ch == 183 || ch == 189) ch -= 16;    /* є, і, ї, ґ */
+        unsigned char ch = i >= 225 ? (i - 32) : i;
+        if(ch == 179) ch -= 16; /* ё */
+        if(ch == 180 || ch == 182 || ch == 183 || ch == 189)
+            ch -= 16; /* є, і, ї, ґ */
 
         double f = freq->frequency[i];
-        if(f == 0.0) f = -10;   /* Penalty for out of range characters. */
+        if(f == 0.0) f = -10; /* Penalty for out of range characters. */
         factor += freq->frequency[i] * scale[ch];
     }
 
@@ -138,9 +141,12 @@ compare_cyrillic_factors(const void *ap, const void *bp) {
 
     double rfa = cyrillic_factor(a);
     double rfb = cyrillic_factor(b);
-    if(rfa < rfb) return 1;
-    else if (rfa > rfb) return -1;
-    else return 0;
+    if(rfa < rfb)
+        return 1;
+    else if(rfa > rfb)
+        return -1;
+    else
+        return 0;
 }
 
 /*
@@ -150,11 +156,11 @@ compare_cyrillic_factors(const void *ap, const void *bp) {
  * building the character frequency tables, and then comparing these tables.
  * The encoding which produces the most cyrillic-like frequency profile wins.
  */
-static const char *detect_cyrillic_encoding(char *str, size_t len, int verbose) {
+static const char *
+detect_cyrillic_encoding(char *str, size_t len, int verbose) {
 #define NUM_ENCODINGS 6
-    char *try_encodings[NUM_ENCODINGS] = {
-        "UTF-8", "UTF-8-MAC",
-        "Windows-1251", "CP866", "KOI8-R", "KOI8-U" };
+    char *try_encodings[NUM_ENCODINGS] = {"UTF-8", "UTF-8-MAC", "Windows-1251",
+                                          "CP866", "KOI8-R",    "KOI8-U"};
     struct char_frequencies freqs[NUM_ENCODINGS];
     int ei;
 
@@ -162,7 +168,7 @@ static const char *detect_cyrillic_encoding(char *str, size_t len, int verbose) 
         memset(&freqs[ei], 0, sizeof(freqs[0]));
         freqs[ei].encoding = try_encodings[ei];
         char *out = convert(str, len, try_encodings[ei], "KOI8-U", verbose);
-        if(!out) continue;  /* Could not convert */
+        if(!out) continue; /* Could not convert */
         const char *p;
         /* Fill out a frequency table */
         for(p = out; *p; p++) {
@@ -178,15 +184,19 @@ static const char *detect_cyrillic_encoding(char *str, size_t len, int verbose) 
         printf("For \"%s\":\n", str);
         for(ei = 0; ei < NUM_ENCODINGS; ei++) {
             printf("\t%s factor %f (%ld)\n", freqs[ei].encoding,
-                        cyrillic_factor(&freqs[ei]),
-                        (long)freqs[ei].characters_seen);
+                   cyrillic_factor(&freqs[ei]),
+                   (long)freqs[ei].characters_seen);
         }
     }
 
     return freqs[0].encoding;
 }
 
-static int fix_cyrillic_filenames(const char *zipfile, int dry_run, const char *suggested_source_encoding, const char *target_encoding, enum runzip_direction runzip_direction, int verbose) {
+static int
+fix_cyrillic_filenames(const char *zipfile, int dry_run,
+                       const char *suggested_source_encoding,
+                       const char *target_encoding,
+                       enum runzip_direction runzip_direction, int verbose) {
     char ebuf[256];
     struct zip *z;
     int fidx, fmax;
@@ -218,15 +228,15 @@ static int fix_cyrillic_filenames(const char *zipfile, int dry_run, const char *
             free(fName);
             continue;
         } else if(verbose) {
-            printf("  Converting \"%s\" (%s -> %s)\n",
-                fName, source_encoding, target_encoding);
+            printf("  Converting \"%s\" (%s -> %s)\n", fName, source_encoding,
+                   target_encoding);
         }
 
-        char *nName = convert(fName, fSize, source_encoding, target_encoding,
-                              verbose);
+        char *nName =
+            convert(fName, fSize, source_encoding, target_encoding, verbose);
         if(!nName) {
-            printf("  Failed to recode \"%s\" (%s -> %s): \"%s\"\n",
-                fName, source_encoding, target_encoding, strerror(errno));
+            printf("  Failed to recode \"%s\" (%s -> %s): \"%s\"\n", fName,
+                   source_encoding, target_encoding, strerror(errno));
             free(fName);
             continue;
         }
@@ -242,11 +252,11 @@ static int fix_cyrillic_filenames(const char *zipfile, int dry_run, const char *
         }
 
         if(!dry_run && zip_rename(z, fidx, nName)) {
-            printf("  %s: Failed to rename inside archive: %s\n",
-                nName, zip_strerror(z));
+            printf("  %s: Failed to rename inside archive: %s\n", nName,
+                   zip_strerror(z));
         } else {
-            printf("  %s: FIXED (%s -> %s)\n", nName,
-                    source_encoding, target_encoding);
+            printf("  %s: FIXED (%s -> %s)\n", nName, source_encoding,
+                   target_encoding);
         }
         free(fName);
     }
@@ -261,28 +271,32 @@ static int fix_cyrillic_filenames(const char *zipfile, int dry_run, const char *
     }
 }
 
-static void usage(char *argv0, const char *default_target_encoding) {
-    fprintf(stderr,
-      "Russian filename encoding fix inside ZIP archives\n"
-      "Copyright (c) 2007, 2009, 2015 Lev Walkin <vlm@lionet.info>\n"
-      "libzip by Dieter Baron <dillo@giga.or.at> and Thomas Klausner <tk@giga.or.at>\n\n"
-      "Usage: %s [OPTIONS] <filename.zip>...\n"
-      "Where OPTIONS are:\n"
-      "  -h                 Display this help screen\n"
-      "  -n                 Dry run. Do not modify the <file.zip>\n"
-      "  -v                 Verbose output\n"
-      "  -s <encoding>      Set source encoding. Auto-detect, if not set\n"
-      "  -t <encoding>      Set target encoding. Default is %s\n"
-      "  -w                 Make archive readable on Windows (reverse operation)\n"
-      "                     NOTE: -w implies -t cp866 (Yes! MS-DOS!)\n"
-      , basename(argv0), default_target_encoding);
+static void
+usage(char *argv0, const char *default_target_encoding) {
+    fprintf(
+        stderr,
+        "Russian filename encoding fix inside ZIP archives\n"
+        "Copyright (c) 2007, 2009, 2015 Lev Walkin <vlm@lionet.info>\n"
+        "libzip by Dieter Baron <dillo@giga.or.at> and Thomas Klausner "
+        "<tk@giga.or.at>\n\n"
+        "Usage: %s [OPTIONS] <filename.zip>...\n"
+        "Where OPTIONS are:\n"
+        "  -h                 Display this help screen\n"
+        "  -n                 Dry run. Do not modify the <file.zip>\n"
+        "  -v                 Verbose output\n"
+        "  -s <encoding>      Set source encoding. Auto-detect, if not set\n"
+        "  -t <encoding>      Set target encoding. Default is %s\n"
+        "  -w                 Make archive readable on Windows (reverse "
+        "operation)\n"
+        "                     NOTE: -w implies -t cp866 (Yes! MS-DOS!)\n",
+        basename(argv0), default_target_encoding);
     exit(EX_USAGE);
 }
 
 int
-main (int ac, char **av) {
+main(int ac, char **av) {
     int ch;
-    int dry_run = 0;    /* -n, do not modify archive */
+    int dry_run = 0; /* -n, do not modify archive */
     int verbose = 0;
     enum runzip_direction direction = RUNZIP_TO_UNIX;
     const char *source_encoding = NULL;
@@ -307,11 +321,11 @@ main (int ac, char **av) {
                 iconv_close(ic);
             }
             break;
-            }
+        }
         case 't': {
             target_encoding = optarg;
-            iconv_t ic = iconv_open(target_encoding,
-                                    source_encoding?:"windows-1251");
+            iconv_t ic =
+                iconv_open(target_encoding, source_encoding ?: "windows-1251");
             if(ic == (iconv_t)-1) {
                 fprintf(stderr, "-t %s: Invalid encoding\n", target_encoding);
                 exit(EX_USAGE);
@@ -319,25 +333,24 @@ main (int ac, char **av) {
                 iconv_close(ic);
             }
             break;
-            }
+        }
         case 'w':
             target_encoding = "cp866";
             direction = RUNZIP_TO_WINDOWS;
             break;
         case 'h':
-            /* FALL THROUGH */
+        /* FALL THROUGH */
         default:
             usage(av[0], default_target_encoding);
         }
     }
-    if(optind >= ac)
-        usage(av[0], default_target_encoding);
+    if(optind >= ac) usage(av[0], default_target_encoding);
 
     for(; optind < ac; optind++) {
         char *zipfile = av[optind];
-        if(fix_cyrillic_filenames(zipfile, dry_run,
-                    source_encoding, target_encoding,
-                    direction, verbose) == -1) {
+        if(fix_cyrillic_filenames(zipfile, dry_run, source_encoding,
+                                  target_encoding, direction, verbose)
+           == -1) {
             exit(EX_NOINPUT);
         }
     }
